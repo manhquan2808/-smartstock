@@ -1,0 +1,135 @@
+# ======================================================================
+# SmartStock - Docker Compose
+#
+# Máy phát triển RAM 8 GB nên có 2 profile:
+#
+#   1) dev  : chỉ chạy MySQL + Mailpit (nhẹ ~600 MB RAM).
+#             Backend chạy bằng `./mvnw spring-boot:run`, frontend `npm run dev`.
+#             => docker compose --profile dev up -d
+#
+#   2) full : chạy toàn bộ hệ thống bằng container (demo/bàn giao).
+#             => docker compose --profile full up -d --build
+# ======================================================================
+
+services:
+  # --------------------------------------------------------------
+  # Cơ sở dữ liệu MySQL 8
+  # --------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    container_name: smartstock-mysql
+    profiles: ["dev", "full"]
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-smartstock}
+      MYSQL_USER: ${MYSQL_USER:-smartstock}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-smartstock123}
+      TZ: Asia/Ho_Chi_Minh
+    # Giới hạn bộ nhớ cho máy RAM 8 GB: buffer pool 256 MB thay vì 128 MB mặc định
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --max-connections=100
+      --default-time-zone=+07:00
+      --performance-schema=OFF
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # Chờ MySQL thực sự nhận kết nối trước khi backend khởi động
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-root123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 700M
+
+  # --------------------------------------------------------------
+  # Mailpit - hộp thư ảo cho môi trường dev
+  #   SMTP : localhost:1025   (backend gửi mail vào đây)
+  #   Web  : http://localhost:8025 (mở để đọc mail)
+  # --------------------------------------------------------------
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: smartstock-mailpit
+    profiles: ["dev", "full"]
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 200
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Giao diện web
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # --------------------------------------------------------------
+  # Backend Spring Boot (chỉ profile full)
+  # --------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartstock-backend
+    profiles: ["full"]
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-smartstock}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-smartstock}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-smartstock123}
+      JWT_SECRET: ${JWT_SECRET:-doi-khoa-nay-thanh-chuoi-bi-mat-rieng-cua-ban-toi-thieu-32-ky-tu}
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_SMTP_AUTH: "false"
+      MAIL_SMTP_STARTTLS: "false"
+      MAIL_FROM: ${MAIL_FROM:-no-reply@smartstock.local}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      APP_FRONTEND_URL: ${APP_FRONTEND_URL:-http://localhost:3000}
+      # Giới hạn heap JVM để vừa máy 8 GB
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:MaxMetaspaceSize=192m"
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend-uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 900M
+
+  # --------------------------------------------------------------
+  # Frontend React build sẵn, phục vụ bằng Nginx (chỉ profile full)
+  # --------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+    container_name: smartstock-frontend
+    profiles: ["full"]
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+volumes:
+  mysql-data:
+  backend-uploads:

@@ -1,0 +1,13 @@
+# ======================================================================
+# Môi trường DEMO: giống dev nhưng tự chèn dữ liệu mẫu khi khởi động.
+# Kích hoạt: ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+# Seed đi qua InventoryService nên tồn kho, giá vốn, thẻ kho luôn khớp.
+# ======================================================================
+app:
+  seed:
+    enabled: true
+    # true = xóa toàn bộ dữ liệu nghiệp vụ rồi tạo lại (chạy lại được nhiều lần)
+    reset: true
+logging:
+  level:
+    com.smartstock.seed: INFO

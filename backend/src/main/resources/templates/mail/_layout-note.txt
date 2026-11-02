@@ -1,0 +1,2 @@
+Các file HTML trong thư mục này là mẫu email, dựng bằng Thymeleaf.
+Dùng CSS nội tuyến (inline) vì phần lớn ứng dụng email bỏ qua thẻ <style>.

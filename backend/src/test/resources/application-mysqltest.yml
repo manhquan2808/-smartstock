@@ -1,0 +1,38 @@
+# ======================================================================
+# Hồ sơ TEST trên MySQL thật.
+#
+# Dùng khi cần kiểm chứng các hành vi chỉ MySQL mới có (khóa dòng
+# SELECT ... FOR UPDATE, kiểu DECIMAL, ràng buộc CHECK).
+#
+# Cách chạy:
+#   docker compose --profile dev up -d
+#   ./mvnw test -Dspring.profiles.active=mysqltest
+#
+# CSDL smartstock_test được Flyway tạo lại schema từ đầu.
+# ======================================================================
+spring:
+  datasource:
+    url: ${TEST_DATASOURCE_URL:jdbc:mysql://localhost:3306/smartstock_test?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${TEST_DATASOURCE_USERNAME:smartstock}
+    password: ${TEST_DATASOURCE_PASSWORD:smartstock123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  flyway:
+    enabled: true
+    clean-disabled: false
+    locations: classpath:db/migration
+
+app:
+  mail:
+    enabled: false
+  seed:
+    enabled: false
+
+logging:
+  level:
+    root: WARN

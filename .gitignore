@@ -1,0 +1,41 @@
+# ===== Java / Maven =====
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+
+# ===== Node / React =====
+tsconfig.tsbuildinfo
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# ===== Môi trường, bí mật (KHÔNG commit) =====
+.env
+.env.local
+.env.*.local
+*.pem
+
+# ===== File tải lên của người dùng =====
+uploads/*
+!uploads/.gitkeep
+
+# ===== IDE / hệ điều hành =====
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# ===== Công cụ tải tạm (JDK/MySQL portable) =====
+.tools/
+
+# ===== Tạm thời của công cụ =====
+# Ảnh và snapshot do công cụ điều khiển trình duyệt sinh ra khi gỡ lỗi
+.playwright-mcp/
+BAO_CAO_THUC_TAP_SMARTSTOCK.docx
+~$O_CAO_THUC_TAP_SMARTSTOCK.docx
+docs

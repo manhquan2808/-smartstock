@@ -1,0 +1,34 @@
+# ======================================================================
+# Môi trường TEST: dùng H2 trong bộ nhớ ở chế độ tương thích MySQL
+# để chạy unit/integration test nhanh, không cần MySQL thật.
+# Các test cần hành vi khóa dòng thật của MySQL được đánh dấu riêng.
+# ======================================================================
+spring:
+  datasource:
+    url: jdbc:h2:mem:smartstock;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  mail:
+    host: localhost
+    port: 3025
+
+app:
+  mail:
+    enabled: false
+  jwt:
+    secret: khoa-bi-mat-chi-dung-cho-moi-truong-test-32-ky-tu-tro-len
+  seed:
+    enabled: false
+
+logging:
+  level:
+    root: WARN

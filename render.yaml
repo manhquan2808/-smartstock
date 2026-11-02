@@ -1,0 +1,92 @@
+# ======================================================================
+# Cấu hình triển khai backend lên Render (gói miễn phí).
+#
+# Cách dùng: trên Render chọn "New +" -> "Blueprint" -> trỏ tới repository này.
+# Render đọc file này và tạo sẵn dịch vụ với đúng cấu hình bên dưới.
+#
+# Có thể làm tay thay cho Blueprint:
+#   New + -> Web Service -> Build from Dockerfile
+#   Root Directory : backend
+#   Dockerfile Path: backend/Dockerfile
+#   Rồi tự thêm các biến môi trường liệt kê trong phần envVars.
+#
+# LƯU Ý về gói miễn phí của Render:
+#   - Dịch vụ "ngủ" sau 15 phút không có request. Lần gọi đầu sau khi ngủ mất
+#     khoảng 30-60 giây để khởi động lại.
+#   - Trước buổi demo, hãy mở trước đường dẫn /actuator/health chừng 1-2 phút
+#     để dịch vụ thức hẳn.
+#   - Ổ đĩa là tạm: ảnh tải lên sẽ MẤT sau mỗi lần khởi động lại. Vì vậy hãy đặt
+#     biến CLOUDINARY_URL để hệ thống tự chuyển sang lưu ảnh trên Cloudinary.
+# ======================================================================
+
+services:
+  - type: web
+    name: smartstock-backend
+    runtime: docker
+    region: singapore
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # ---------- Cơ sở dữ liệu: Aiven for MySQL (gói free) ----------
+      # Lấy thông tin kết nối trong trang Overview của service Aiven.
+      # Chuỗi JDBC có dạng:
+      #   jdbc:mysql://<host>:<port>/<database>?useUnicode=true&characterEncoding=utf8
+      #     &serverTimezone=Asia/Ho_Chi_Minh&sslMode=REQUIRED
+      # Aiven BẮT BUỘC dùng SSL nên phải có sslMode=REQUIRED.
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+
+      # ---------- JWT ----------
+      # Để Render tự sinh khóa bí mật ngẫu nhiên, không cần tự nghĩ chuỗi.
+      # Lưu ý: khóa đổi thì mọi phiên đang đăng nhập bị vô hiệu.
+      - key: JWT_SECRET
+        generateValue: true
+
+      # ---------- Frontend và CORS ----------
+      # Thay bằng domain Netlify thật sau khi deploy frontend.
+      - key: APP_FRONTEND_URL
+        sync: false
+      - key: APP_CORS_ALLOWED_ORIGINS
+        sync: false
+
+      # Frontend (Netlify) và backend (Render) khác domain nên cookie refresh token
+      # phải là SameSite=None + Secure, nếu không trình duyệt sẽ không gửi cookie.
+      - key: APP_COOKIE_SAME_SITE
+        value: none
+      - key: APP_COOKIE_SECURE
+        value: "true"
+
+      # ---------- Email: Gmail App Password ----------
+      # Tạo tại https://myaccount.google.com/apppasswords (cần bật xác minh 2 bước).
+      # Dùng mật khẩu ứng dụng 16 ký tự, KHÔNG dùng mật khẩu Gmail thật.
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_SMTP_AUTH
+        value: "true"
+      - key: MAIL_SMTP_STARTTLS
+        value: "true"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+
+      # ---------- Lưu ảnh: Cloudinary ----------
+      # Dạng: cloudinary://<api_key>:<api_secret>@<cloud_name>
+      # Bỏ trống thì ảnh lưu vào ổ đĩa tạm và sẽ mất khi dịch vụ khởi động lại.
+      - key: CLOUDINARY_URL
+        sync: false

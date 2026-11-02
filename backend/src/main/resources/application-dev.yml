@@ -1,0 +1,16 @@
+# ======================================================================
+# Môi trường DEV: chạy trên máy cá nhân, MySQL + Mailpit trong Docker.
+# Kích hoạt: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# ======================================================================
+logging:
+  level:
+    com.smartstock: DEBUG
+    # Bật 2 dòng dưới khi cần xem câu SQL Hibernate sinh ra
+    org.hibernate.SQL: INFO
+    org.hibernate.orm.jdbc.bind: INFO
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true

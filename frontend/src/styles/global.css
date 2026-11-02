@@ -1,0 +1,187 @@
+/* ======================================================================
+   SmartStock - CSS toàn cục
+   Chỉ chứa phần Ant Design không lo được: reset nhẹ, biến màu theo chủ đề,
+   điều chỉnh responsive và định dạng trang in.
+   ====================================================================== */
+
+:root {
+  --ss-header-height: 56px;
+  --ss-content-padding: 16px;
+  --ss-dropdown-bg: #ffffff;
+  /* Màu cảnh báo tồn thấp và tồn âm, dùng chung cho bảng và biểu đồ */
+  --ss-danger: #cf1322;
+  --ss-warning: #d46b08;
+  --ss-success: #389e0d;
+}
+
+/* Biến màu cho chế độ tối. Thuộc tính data-theme được ThemeContext đặt lên thẻ <html>. */
+[data-theme='dark'] {
+  --ss-dropdown-bg: #1f1f1f;
+  --ss-danger: #ff7875;
+  --ss-warning: #ffa940;
+  --ss-success: #73d13d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ----------------------------------------------------------------------
+   Thanh cuộn mảnh, hài hòa với cả hai chế độ sáng/tối
+   ---------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ----------------------------------------------------------------------
+   Lớp tiện dụng dùng trong các trang
+   ---------------------------------------------------------------------- */
+
+/* Dòng bảng bị tô đỏ nhạt: dùng cho dòng xuất vượt tồn và tồn âm */
+.row-danger > td {
+  background-color: rgba(255, 77, 79, 0.08) !important;
+}
+
+[data-theme='dark'] .row-danger > td {
+  background-color: rgba(255, 77, 79, 0.16) !important;
+}
+
+/* Dòng bảng cảnh báo: tồn ở mức tối thiểu */
+.row-warning > td {
+  background-color: rgba(250, 173, 20, 0.1) !important;
+}
+
+[data-theme='dark'] .row-warning > td {
+  background-color: rgba(250, 173, 20, 0.18) !important;
+}
+
+/* Số âm luôn hiển thị màu đỏ để dễ nhận ra khi xem chênh lệch kiểm kê */
+.text-negative {
+  color: var(--ss-danger);
+  font-weight: 600;
+}
+
+.text-positive {
+  color: var(--ss-success);
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------------
+   Responsive cho điện thoại và máy tính bảng
+   Các màn hình lập phiếu, kiểm kê và quét mã phải dùng tốt trên điện thoại.
+   ---------------------------------------------------------------------- */
+@media (max-width: 991px) {
+  :root {
+    --ss-content-padding: 10px;
+  }
+
+  /* Bảng dữ liệu cuộn ngang thay vì bóp chữ lại không đọc được */
+  .ant-table {
+    font-size: 13px;
+  }
+
+  .ant-table-tbody > tr > td,
+  .ant-table-thead > tr > th {
+    padding: 8px 8px !important;
+  }
+
+  /* Tiêu đề trang nhỏ lại cho vừa màn hình hẹp */
+  .ant-typography h4 {
+    font-size: 17px !important;
+  }
+
+  /* Thẻ chỉ số trên dashboard xếp dọc, chữ số vẫn đủ lớn để đọc */
+  .ant-statistic-content {
+    font-size: 19px !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Chỉ hiện tên người dùng cạnh avatar khi màn hình đủ rộng */
+  .header-username {
+    display: inline !important;
+  }
+}
+
+/* Trên màn hình rất hẹp, ẩn cột ít quan trọng đã được đánh dấu */
+@media (max-width: 575px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+/* ----------------------------------------------------------------------
+   Định dạng khi IN (dùng cho trang in tem mã vạch)
+   ---------------------------------------------------------------------- */
+@media print {
+  /* Ẩn mọi thứ không thuộc vùng cần in */
+  .no-print,
+  .ant-layout-sider,
+  .ant-layout-header,
+  .ant-layout-footer,
+  .ant-breadcrumb {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .ant-layout,
+  .ant-layout-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Vùng in tem: lưới A4, không để một tem bị cắt làm hai trang */
+  .print-area {
+    display: block !important;
+  }
+
+  .label-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4mm;
+  }
+
+  .label-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px dashed #bbb;
+    padding: 2mm;
+    text-align: center;
+  }
+
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+}

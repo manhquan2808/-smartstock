@@ -1,0 +1,20 @@
+# ======================================================================
+# Môi trường PRODUCTION (Render + Aiven for MySQL).
+# Mọi giá trị bí mật lấy từ biến môi trường của dịch vụ hosting.
+# ======================================================================
+logging:
+  level:
+    root: WARN
+    com.smartstock: INFO
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+app:
+  cookie:
+    # Frontend (Netlify) và backend (Render) khác domain nên cookie phải None + Secure
+    same-site: none
+    secure: true

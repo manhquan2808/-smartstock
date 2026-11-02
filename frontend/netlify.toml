@@ -1,0 +1,46 @@
+# ======================================================================
+# Cấu hình triển khai frontend lên Netlify (gói miễn phí).
+#
+# Các bước làm trên Netlify:
+#   1. New site from Git -> chọn repository này.
+#   2. Base directory  : frontend
+#      Build command   : npm run build
+#      Publish directory: frontend/dist
+#   3. Site settings -> Environment variables: thêm
+#      VITE_API_BASE_URL = https://<ten-dich-vu>.onrender.com
+#   4. Deploy. Mỗi lần push lên nhánh chính, Netlify tự build lại.
+# ======================================================================
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Chuyển hướng cho ứng dụng một trang (SPA).
+#
+# Bắt buộc phải có: React Router xử lý đường dẫn ở phía trình duyệt, nên khi người
+# dùng mở trực tiếp https://site/receipts/12 hoặc bấm F5, Netlify sẽ tìm file
+# /receipts/12 và trả 404. Luật dưới đây yêu cầu Netlify trả index.html cho mọi
+# đường dẫn, để React Router tự định tuyến.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Các header bảo mật cơ bản
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
+
+# File tài nguyên có mã băm trong tên: lưu đệm dài hạn
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
