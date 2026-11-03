@@ -99,24 +99,24 @@ export default function AppLayout() {
       { key: '/issues', icon: <ExportOutlined />, label: <Link to="/issues">Phiếu xuất kho</Link> },
       { key: '/stocktakes', icon: <SolutionOutlined />, label: <Link to="/stocktakes">Kiểm kê kho</Link> },
       { key: '/inventory', icon: <DatabaseOutlined />, label: <Link to="/inventory">Tồn kho</Link> },
-      { key: '/stock-card', icon: <FileTextOutlined />, label: <Link to="/stock-card">Thẻ kho</Link> },
+      // { key: '/stock-card', icon: <FileTextOutlined />, label: <Link to="/stock-card">Thẻ kho</Link> },
     ];
 
     // Gợi ý nhập hàng và báo cáo giá trị chỉ dành cho ADMIN/MANAGER
-    if (canViewCost) {
-      items.push({
-        key: '/replenishment',
-        icon: <ShopOutlined />,
-        label: <Link to="/replenishment">Gợi ý nhập hàng</Link>,
-      });
-      items.push({ key: '/reports', icon: <BarChartOutlined />, label: <Link to="/reports">Báo cáo</Link> });
-    }
+    // if (canViewCost) {
+    //   items.push({
+    //     key: '/replenishment',
+    //     icon: <ShopOutlined />,
+    //     label: <Link to="/replenishment">Gợi ý nhập hàng</Link>,
+    //   });
+    //   items.push({ key: '/reports', icon: <BarChartOutlined />, label: <Link to="/reports">Báo cáo</Link> });
+    // }
 
-    items.push({
-      key: '/barcode-labels',
-      icon: <BarcodeOutlined />,
-      label: <Link to="/barcode-labels">In tem mã vạch</Link>,
-    });
+    // items.push({
+    //   key: '/barcode-labels',
+    //   icon: <BarcodeOutlined />,
+    //   label: <Link to="/barcode-labels">In tem mã vạch</Link>,
+    // });
 
     // Nhóm quản trị: chỉ ADMIN
     if (isAdmin) {
@@ -126,8 +126,8 @@ export default function AppLayout() {
         label: 'Quản trị',
         children: [
           { key: '/users', icon: <TeamOutlined />, label: <Link to="/users">Người dùng</Link> },
-          { key: '/audit-logs', icon: <AuditOutlined />, label: <Link to="/audit-logs">Nhật ký hoạt động</Link> },
-          { key: '/settings', label: <Link to="/settings">Cấu hình hệ thống</Link> },
+          // { key: '/audit-logs', icon: <AuditOutlined />, label: <Link to="/audit-logs">Nhật ký hoạt động</Link> },
+          // { key: '/settings', label: <Link to="/settings">Cấu hình hệ thống</Link> },
         ],
       });
     }
