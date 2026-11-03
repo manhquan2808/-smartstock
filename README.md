@@ -256,11 +256,41 @@ jdbc:mysql://<host>:<port>/<database>?useUnicode=true&characterEncoding=utf8&ser
 ### 8.3. Frontend - Netlify
 
 1. Tạo tài khoản [netlify.com](https://netlify.com), chọn **Add new site → Import an existing project**.
-2. Chọn repository. Netlify tự đọc `frontend/netlify.toml` nên không cần cấu hình build.
-3. Vào **Site settings → Environment variables**, thêm:
+2. Chọn repository. Netlify đọc file `netlify.toml` **ở thư mục gốc repo** nên không cần
+   điền tay phần build. Nếu Netlify vẫn hỏi, điền đúng ba giá trị sau:
+   - **Base directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Publish directory**: `frontend/dist` (ô trên giao diện tính từ gốc repo)
+3. Vào **Site configuration → Environment variables**, thêm:
    - `VITE_API_BASE_URL` = `https://<ten-dich-vu>.onrender.com`
+
+   > Vite nhúng biến này vào mã **lúc build**, không đọc lúc chạy. Phải thêm biến
+   > **trước** lần deploy đầu; nếu thêm sau thì bắt buộc bấm
+   > **Deploys → Trigger deploy → Clear cache and deploy site**, chỉ bấm "Retry" sẽ
+   > dùng lại bản build cũ không có biến.
 4. Bấm **Deploy**. Sau khi xong, quay lại Render cập nhật `APP_CORS_ALLOWED_ORIGINS`
    và `APP_FRONTEND_URL` thành domain Netlify thật, rồi deploy lại backend.
+
+**Không có repository trên GitHub?** Có thể deploy thủ công, không cần Git:
+
+```powershell
+cd frontend
+$env:VITE_API_BASE_URL = "https://<ten-dich-vu>.onrender.com"
+npm run build
+```
+
+rồi kéo-thả thư mục `frontend/dist` (đúng thư mục `dist`, không phải `frontend`
+hay thư mục gốc dự án) vào vùng **Deploys → Deploy manually** trên Netlify.
+File `frontend/public/_redirects` được Vite sao vào `dist` nên cách này cũng không bị
+lỗi 404 khi bấm F5 ở các đường dẫn con.
+
+**Gặp trang "Page not found" của Netlify?** Ba nguyên nhân theo thứ tự hay gặp:
+
+| Dấu hiệu | Nguyên nhân | Cách sửa |
+|---|---|---|
+| 404 ngay ở trang chủ `/` | Publish directory sai, Netlify đang publish thư mục không có `index.html` | Đặt base `frontend`, publish `frontend/dist` như trên |
+| Trang chủ mở được, 404 khi bấm F5 ở `/products` | Thiếu luật chuyển hướng SPA | Đã có sẵn trong `netlify.toml` và `frontend/public/_redirects`, cần build lại |
+| 404 nhưng site chưa từng build xong | Site mới tạo chưa có bản deploy nào thành công | Xem **Deploys → Deploy log** để đọc lỗi build thật |
 
 ### 8.4. Tạo dữ liệu demo trên môi trường trực tuyến
 
@@ -316,9 +346,10 @@ smartstock/
 │   └── Dockerfile
 ├── frontend/             # React + Vite + TypeScript
 │   ├── src/
-│   ├── Dockerfile, nginx.conf, netlify.toml
+│   ├── Dockerfile, nginx.conf, public/_redirects
 │   └── package.json
 ├── docs/                 # Tài liệu, sơ đồ, test case, Postman
+├── netlify.toml          # Cấu hình triển khai Netlify (bắt buộc ở gốc repo)
 ├── docker-compose.yml    # Profile dev (MySQL + Mailpit) và full
 ├── render.yaml           # Cấu hình triển khai Render
 ├── .env.example
